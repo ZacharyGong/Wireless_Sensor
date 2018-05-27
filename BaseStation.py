@@ -24,6 +24,8 @@ class BaseStation():
         self.network = []
         self.allSensorData = "xixixixixi"
         self.networkLock = RLock()
+        self.clusterH = []
+        self.adrrCH = "0.0.0.0"
         
         
     @property
@@ -80,6 +82,10 @@ class BaseStation():
                 temp,code=msgHandler.Decode_Sensor_Data(data)
                 if code==0:
                     self.allSensorData=self.allSensorData+temp  
+                    with self.networkLock:
+                        for i in range(len(self.network)):
+                            if self.network[i][0] == self.addrCH:
+                                self.network[i][3] = time.time()
                     print temp
                 else:
                     print 'Error in decoding sensor data'               
@@ -97,7 +103,7 @@ class BaseStation():
         coor         =  info[2]
         try:
             with self.networkLock:
-                for i in range(1,len(self.network)):
+                for i in range(len(self.network)):
                     if self.network[i][0] == address:
                         self.network[i][1] = energy_level
                         self.network[i][2] = coor
@@ -139,32 +145,30 @@ class BaseStation():
         listNodeNoCH=[]
         with self.networkLock:
             
-            for i in range(1,len(self.network)):
+            for i in range(len(self.network)):
                 NodeCH = False
-                for j in range(1,len(self.network[0])):
-                    if self.network[i][0] == self.network[0][j]:
+                for j in range(len(self.clusterH)):
+                    if self.network[i][0] == self.clusterH:
                         NodeCH = True 
                 if NodeCH == False and self.alive(self.network[i][0]) == 1:
                     listNodeNoCH.append(self.network[i])
                     
             if len(listNodeNoCH) == 0:
                 listNodeNoCH = copy.deepcopy(self.network)
-                del listNodeNoCH[0]
-                for i in range(len(self.network[0])-1):
-                    del self.network[0][i+1]
+                self.clusterH [:] = []
 
         e = listNodeNoCH[0][1]
         for i in range(1,listNodeNoCH):
             if listNodeNoCH[i][1] > e:
-                adrrCH = listNodeNoCH[i][0]
-                e      = listNodeNoCH[i][1]
-                coorCH = listNodeNoCH[i][2]
-                
+                self.adrrCH = listNodeNoCH[i][0]
+                e           = listNodeNoCH[i][1]
+                coorCH      = listNodeNoCH[i][2]
+        self.clusterH.append(self.adrrCH)
         msgHandler = MsgHandler()
-        msgCH = msgHandler.Encode_CH_Change_Msg(adrrCH,e,coorCH)
-        print("New Cluster Head :", adrrCH)
+        msgCH = msgHandler.Encode_CH_Change_Msg(self.adrrCH,e,coorCH)
+        print("New Cluster Head :", self.adrrCH)
         
-        return adrrCH,msgCH
+        return self.adrrCH,msgCH
             
     def broadcast(self,msgCH):
         code=0
@@ -183,20 +187,6 @@ class BaseStation():
 if __name__ == '__main__':
     base    = BaseStation()
     choseCH = time.time()
-    hote = "localhost"
-    port = 12800
-    thread.start_new_thread(base.receive, ('',port))
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  
-    addr = ("localhost", port)
-    try:
-        msgHandler =  MsgHandler()
-        msg = msgHandler.Encode_Info_Msg("localhost",20,[2,2])
-        s.sendto(msg, addr)
-        print 'sent:' + msg
-    except:
-        code=1
-    finally:
-        s.close()
     while(1):
         
         if(time.time()-choseCH)>30:
