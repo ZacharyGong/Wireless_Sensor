@@ -5,7 +5,6 @@ Script class base station
 """
 from threading import  RLock
 import thread
-
 import time
 import socket
 import MsgHandler
@@ -188,10 +187,11 @@ if __name__ == '__main__':
     base    = BaseStation()
     choseCH = time.time()
     while(1):
-        
+        thread.start_new_thread(base.recive, ())
         if(time.time()-choseCH)>30:
             adrrCH, msgCH = base.toBeCH()
             base.send(adrrCH,12800,msgCH)
+            choseCH=time.time()
         
        
         
