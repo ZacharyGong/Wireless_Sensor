@@ -147,7 +147,7 @@ class BaseStation():
             for i in range(len(self.network)):
                 NodeCH = False
                 for j in range(len(self.clusterH)):
-                    if self.network[i][0] == self.clusterH:
+                    if self.network[i][0] == self.clusterH[j]:
                         NodeCH = True 
                 if NodeCH == False and self.alive(self.network[i][0]) == 1:
                     listNodeNoCH.append(self.network[i])
