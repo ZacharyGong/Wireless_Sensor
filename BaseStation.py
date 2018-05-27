@@ -47,6 +47,10 @@ class BaseStation():
     @property
     def network(self):
         return self.network
+
+    @property
+    def adrrCH(self):
+        return self.adrrCH
     
     def receive(self,addr_source, port_source):
         code=0
@@ -197,6 +201,11 @@ if __name__ == '__main__':
            choseCH=time.time()
         
         if(time.time()-choseCH)>30:
+            adrrCH, msgCH = base.toBeCH()
+            base.send(adrrCH,12800,msgCH)
+            choseCH=time.time()
+            
+        if base.alive(base.adrrCH()) == 0:
             adrrCH, msgCH = base.toBeCH()
             base.send(adrrCH,12800,msgCH)
             choseCH=time.time()
