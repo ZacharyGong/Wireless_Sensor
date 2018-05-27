@@ -27,30 +27,31 @@ class BaseStation():
         self.adrrCH = "0.0.0.0"
         
         
-    @property
-    def IPadress(self):
+
+    def _get_IPadress(self):
         return self._IPadress
 
-    @IPadress.setter
-    def IPadress(self, IP):
+    def _set_IPadress(self, IP):
         self._IPadress  =  IP
         
-        
-    @property
-    def coordinate(self):
+    _IPadress = property(_get_IPadress, _set_IPadress)
+    
+    def _get_coordinate(self):
         return self._coordinate
 
-    @coordinate.setter
-    def coordinate(self, (x,y)):
+    def _set_coordinate(self, (x,y)):
         self._coordinate  =  (x,y)
+    
+    _coordinate = property(_get_coordinate, _set_coordinate)
         
-    @property
-    def network(self):
+    def _get_network(self):
         return self.network
-
-    @property
-    def adrrCH(self):
+    network = property(_get_network)
+    
+    def _get_adrrCH(self):
         return self.adrrCH
+    adrrCH = property(_get_adrrCH)
+    
     
     def receive(self,addr_source, port_source):
         code=0
@@ -194,8 +195,8 @@ if __name__ == '__main__':
     base    = BaseStation()
     choseCH = time.time()
     while(1):
-        thread.start_new_thread(base.recive, ())
-        if len(base.network()) == 2:
+        thread.start_new_thread(base.receive,( base._get_IPadress, 12800))
+        if len(base._get_network()) == 2:
            adrrCH, msgCH = base.toBeCH()
            base.send(adrrCH,12800,msgCH)
            choseCH=time.time()
@@ -205,7 +206,7 @@ if __name__ == '__main__':
             base.send(adrrCH,12800,msgCH)
             choseCH=time.time()
             
-        if base.alive(base.adrrCH()) == 0:
+        if base.alive(base._get_adrrCH()) == 0:
             adrrCH, msgCH = base.toBeCH()
             base.send(adrrCH,12800,msgCH)
             choseCH=time.time()
