@@ -43,7 +43,10 @@ class BaseStation():
     @coordinate.setter
     def coordinate(self, (x,y)):
         self._coordinate  =  (x,y)
-      
+        
+    @property
+    def network(self):
+        return self.network
     
     def receive(self,addr_source, port_source):
         code=0
@@ -188,6 +191,11 @@ if __name__ == '__main__':
     choseCH = time.time()
     while(1):
         thread.start_new_thread(base.recive, ())
+        if len(base.network()) == 2:
+           adrrCH, msgCH = base.toBeCH()
+           base.send(adrrCH,12800,msgCH)
+           choseCH=time.time()
+        
         if(time.time()-choseCH)>30:
             adrrCH, msgCH = base.toBeCH()
             base.send(adrrCH,12800,msgCH)
